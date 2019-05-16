@@ -93,7 +93,7 @@ class PMCLogger {
             val logs = MutableLiveData<List<PMCLog>>()
             CoroutineScope(Dispatchers.IO).launch {
                 val dao = PMCLogDatabase.getDatabase(applicationContext).logDao()
-                logs.postValue(dao.getLogs())
+                logs.postValue(dao.getAllLogs())
             }
             return logs
         }
@@ -103,7 +103,7 @@ class PMCLogger {
             CoroutineScope(Dispatchers.IO).launch {
                 val dao = PMCLogDatabase.getDatabase(applicationContext).logDao()
                 dao.deleteAllLogs()
-                logs.postValue(dao.getLogs())
+                logs.postValue(dao.getAllLogs())
             }
             return logs
         }
@@ -113,6 +113,15 @@ class PMCLogger {
             CoroutineScope(Dispatchers.IO).launch {
                 val dao = PMCLogDatabase.getDatabase(applicationContext).logDao()
                 logs.postValue(dao.getTag())
+            }
+            return logs
+        }
+
+        fun getLogsWithTag(tag: String): MutableLiveData<List<PMCLog>> {
+            val logs = MutableLiveData<List<PMCLog>>()
+            CoroutineScope(Dispatchers.IO).launch {
+                val dao = PMCLogDatabase.getDatabase(applicationContext).logDao()
+                logs.postValue(dao.getLogsWithTag(tag))
             }
             return logs
         }

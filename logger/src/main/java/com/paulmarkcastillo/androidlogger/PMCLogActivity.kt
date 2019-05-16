@@ -2,6 +2,9 @@ package com.paulmarkcastillo.androidlogger
 
 import android.app.AlertDialog
 import android.os.Bundle
+import android.view.View
+import android.widget.AdapterView
+import android.widget.AdapterView.*
 import android.widget.ArrayAdapter
 import android.widget.Spinner
 import androidx.appcompat.app.AppCompatActivity
@@ -18,6 +21,8 @@ class PMCLogActivity : AppCompatActivity() {
     private lateinit var adapter: PMCLogAdapter
     private lateinit var progressDialog: AlertDialog
     private lateinit var spinnerAdapter: ArrayAdapter<String>
+    private lateinit var tag: String
+    private  var showWithTag = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,7 +49,12 @@ class PMCLogActivity : AppCompatActivity() {
         binding.recyclerviewLogs.adapter = adapter
 
         binding.buttonRefresh.setOnClickListener {
-            displayLogs()
+            if (showWithTag) {
+                displayLogsWithSelectedTag(tag)
+            } else {
+                displayLogs()
+            }
+
         }
 
         binding.buttonClear.setOnClickListener {
@@ -52,6 +62,18 @@ class PMCLogActivity : AppCompatActivity() {
         }
 
         setupSpinnerAdapter(tagsList(), binding.tagsSpnr)
+
+        binding.tagsSpnr.onItemSelectedListener = object : OnItemSelectedListener {
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+
+            }
+
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                showWithTag = position > 0
+                tag = binding.tagsSpnr.selectedItem.toString()
+            }
+
+        }
     }
 
     override fun onResume() {
@@ -89,6 +111,7 @@ class PMCLogActivity : AppCompatActivity() {
     fun tagsList(): ArrayList<String> {
         val tags = ArrayList<String>()
         val logs = PMCLogger.getTag()
+        tags.add("All")
         logs.observe(this, Observer<List<String>> {
             it.forEach { tag ->
                 tags.add(tag)
@@ -96,5 +119,14 @@ class PMCLogActivity : AppCompatActivity() {
             spinnerAdapter.notifyDataSetChanged()
         })
         return tags
+    }
+
+    fun displayLogsWithSelectedTag(tag: String) {
+        progressDialog.show()
+        val logs = PMCLogger.getLogsWithTag(tag)
+        logs.observe(this, Observer<List<PMCLog>> {
+            adapter.submitList(it)
+            progressDialog.dismiss()
+        })
     }
 }
