@@ -15,4 +15,7 @@ interface PMCLogDao {
 
     @Query("DELETE FROM PMCLog")
     suspend fun deleteAllLogs()
+
+    @Query("SELECT tag FROM PMCLog GROUP BY tag")
+    suspend fun getTag() : List<String>
 }

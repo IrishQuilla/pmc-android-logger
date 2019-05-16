@@ -108,6 +108,15 @@ class PMCLogger {
             return logs
         }
 
+        fun getTag(): MutableLiveData<List<String>> {
+            val logs = MutableLiveData<List<String>>()
+            CoroutineScope(Dispatchers.IO).launch {
+                val dao = PMCLogDatabase.getDatabase(applicationContext).logDao()
+                logs.postValue(dao.getTag())
+            }
+            return logs
+        }
+
         // Utilities
 
         fun getPriorityText(priority: Int): String {

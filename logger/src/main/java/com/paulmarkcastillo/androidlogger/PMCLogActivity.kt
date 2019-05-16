@@ -2,6 +2,8 @@ package com.paulmarkcastillo.androidlogger
 
 import android.app.AlertDialog
 import android.os.Bundle
+import android.widget.ArrayAdapter
+import android.widget.Spinner
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
@@ -15,6 +17,7 @@ class PMCLogActivity : AppCompatActivity() {
 
     private lateinit var adapter: PMCLogAdapter
     private lateinit var progressDialog: AlertDialog
+    private lateinit var spinnerAdapter: ArrayAdapter<String>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,6 +50,8 @@ class PMCLogActivity : AppCompatActivity() {
         binding.buttonClear.setOnClickListener {
             deleteLogs()
         }
+
+        setupSpinnerAdapter(tagsList(), binding.tagsSpnr)
     }
 
     override fun onResume() {
@@ -70,5 +75,26 @@ class PMCLogActivity : AppCompatActivity() {
             adapter.submitList(it)
             progressDialog.dismiss()
         })
+    }
+
+    fun setupSpinnerAdapter(list: ArrayList<String>, spinner: Spinner) {
+        spinnerAdapter = ArrayAdapter(
+            this,
+            R.layout.spinner_item_layout,
+            list
+        )
+        spinner.adapter = spinnerAdapter
+    }
+
+    fun tagsList(): ArrayList<String> {
+        val tags = ArrayList<String>()
+        val logs = PMCLogger.getTag()
+        logs.observe(this, Observer<List<String>> {
+            it.forEach { tag ->
+                tags.add(tag)
+            }
+            spinnerAdapter.notifyDataSetChanged()
+        })
+        return tags
     }
 }
